@@ -23,15 +23,10 @@ func main() {
 	if port == "" {
 		port = "3000"
 	}
-
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("/", uploadFileHandler())
-
 	http.ListenAndServe(":"+port, mux)
-
 }
-
 func Connstr() (db *sql.DB) {
 
 	dbDriver := "mssql"
@@ -59,7 +54,6 @@ func uploadFileHandler() http.HandlerFunc {
 			renderError(w, "CANT_PARSE_FORM", http.StatusInternalServerError)
 			return
 		}
-
 		// parse and validate file and post parameters
 		file, fileHeader, err := r.FormFile("myFile")
 		if err != nil {
@@ -69,7 +63,6 @@ func uploadFileHandler() http.HandlerFunc {
 		defer file.Close()
 		// Get and print out file size
 		fileSize := fileHeader.Size
-		fmt.Printf("File size (bytes): %v\n", fileSize)
 		// validate file size
 		if fileSize > maxUploadSize {
 			renderError(w, "FILE_TOO_BIG", http.StatusBadRequest)
@@ -84,19 +77,15 @@ func uploadFileHandler() http.HandlerFunc {
 		db := Connstr()
 		if r.Method == "POST" {
 			file := fileBytes
-
 			insForm, err := db.Prepare("INSERT INTO fileupdown(filebyte) VALUES(?)")
 			if err != nil {
 				panic(err.Error())
 			}
 			insForm.Exec(file)
-
 		}
 		defer db.Close()
-
 	})
 }
-
 func renderError(w http.ResponseWriter, message string, statusCode int) {
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write([]byte(message))
